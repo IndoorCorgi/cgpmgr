@@ -111,8 +111,9 @@ def main():
 
   try:
     i2c = smbus.SMBus(1)
-  except IOError:
-    print('I2Cの初期化に失敗しました. I2Cが有効になっているか確認して下さい. ')
+  except FileNotFoundError:
+    print('I2Cバスが開けませんでした. I2Cが有効になっているか確認して下さい. ')
+    return
 
   # セカンダリI2Cアドレスを使用
   if args['-a']:
