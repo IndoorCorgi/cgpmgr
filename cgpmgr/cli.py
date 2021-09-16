@@ -1,6 +1,7 @@
 """
 Raspberry Pi電源管理 拡張基板 RPZ-PowerMGR用コントロールツール
 Indoor Corgi, https://www.indoorcorgielec.com
+GitHub: https://github.com/IndoorCorgi/cgpmgr
 Version Dev
 
 必要環境:
