@@ -95,8 +95,6 @@ known_hash = [
 ]
 
 
-#----------------------------
-# メインルーチン
 def main():
   global i2c
   global i2c_adr
@@ -476,31 +474,50 @@ def main():
     print('ファームウェアの書き換えが完了しました. ')
 
 
-#----------------------------
-# サブルーチン
-
-
-# I2Cで指定アドレスから読み出す
-#   length : 読み出すバイト数. 32バイトまで.
 def i2c_read(addr, length):
+  """
+  I2Cで指定アドレスから読み出す
+
+  Args:
+    addr: 読み出しアドレス. 8bit. 
+    length: 読み出しデータの長さ. バイト数.
+  
+  Returns:
+    list: 読み出しデータのリスト. 通信失敗で全て0を返す. 
+  """
   try:
     return i2c.read_i2c_block_data(i2c_adr, addr, length)
   except IOError:
     return [0 for i in range(length)]
 
 
-# I2Cで指定アドレスに書き込む
-#   data : バイト配列. 32バイトまで.
 def i2c_write(addr, data):
+  """
+  I2Cで指定アドレスに書き込む
+
+  Args:
+    addr: 書き込みアドレス. 8bit. 
+    data(list): 書き込みデータのリスト. [1バイト目, 2バイト目, ...]
+  """
   try:
     i2c.write_i2c_block_data(i2c_adr, addr, data)
   except IOError:
     return
 
 
-# 文字列numがmin-maxの範囲の数値であればTrueを返す
-#   option : エラーメッセージ用にオプションを指定する.
 def check_digit(option, num, min, max):
+  """
+  文字列numが整数かチェックし, min-maxの範囲の数値であればTrueを返す
+
+  Args:
+    option: エラーメッセージに表示する文字列を指定. ''の場合はエラーメッセージを表示しない. 
+    num: チェックする文字列
+    min: 数値の範囲の下限
+    max: 数値の範囲の上限
+  
+  Returns:
+    bool: Trueなら問題なし. Falseなら整数でないか範囲外. 
+  """
   val = False
 
   try:
@@ -515,9 +532,18 @@ def check_digit(option, num, min, max):
   return val
 
 
-# 文字列numがval_listに含まれる数値であればTrueを返す
-#   option : エラーメッセージ用にオプションを指定する.
 def check_digit_list(option, num, val_list):
+  """
+  文字列numが整数で, val_listのいずれかに一致すればTrueを返す
+
+  Args:
+    option: エラーメッセージに表示する文字列を指定. ''の場合はエラーメッセージを表示しない. 
+    num: チェックする文字列
+    val_list: 候補が入った整数のリスト. 
+  
+  Returns:
+    bool: Trueなら問題なし. Falseなら整数でないか候補にない値. 
+  """
   val = False
   try:
     num_int = int(num)
@@ -531,8 +557,20 @@ def check_digit_list(option, num, val_list):
   return val
 
 
-# RTC BCDフォーマットの7バイトデータを表示
 def print_time_bcd(bcd):
+  """
+  BCDフォーマットの7バイトの時刻データを画面に表示
+  bcd[0]: 秒
+  bcd[1]: 分
+  bcd[2]: 時
+  bcd[3]: 曜日
+  bcd[4]: 日
+  bcd[5]: 月
+  bcd[6]: 年
+  
+  Args:
+    bcd: BCDフォーマットの7バイトデータのリスト
+  """
   print('20{}{}/{}{}/{}{} '.format(bcd[6] >> 4, bcd[6] & 0xF, bcd[5] >> 4, bcd[5] & 0xF, bcd[4] >> 4, bcd[4] & 0xF),
         end='')
   if bcd[3] == 1:
@@ -553,6 +591,21 @@ def print_time_bcd(bcd):
 
 
 def make_bcd(year, month, date, dow, hour, minute, second):
+  """
+  指定日時から, BCDフォーマットの7バイトのデータを生成
+
+  Args:
+    year: 年
+    month: 月
+    date: 日
+    dow: 曜日. 日曜日が1, 土曜日が7
+    hour: 時
+    minute: 分
+    second: 秒
+  
+  Returns:
+    list: BCDフォーマットの7バイトデータのリスト
+  """
   bcd = [0] * 7
   bcd[0] = second % 10 + (second // 10 << 4)
   bcd[1] = minute % 10 + (minute // 10 << 4)
@@ -565,8 +618,13 @@ def make_bcd(year, month, date, dow, hour, minute, second):
   return bcd
 
 
-# RTCの時刻を読み出してdatetimeに変換
 def read_rtc():
+  """
+  RTCの時刻を読み出してdatetimeに変換. タイムゾーンはRPZ-PowerMGRの設定値を読み出して計算. 
+
+  Returns:
+    datetime: タイムゾーン補正後のRTC時刻 
+  """
   bcd = i2c_read(0x0, 7)
   year = (bcd[6] & 0xF) + (bcd[6] >> 4) * 10 + 2000
   month = (bcd[5] & 0xF) + (bcd[5] >> 4) * 10
@@ -581,8 +639,16 @@ def read_rtc():
   return dt + datetime.timedelta(minutes=struct.unpack("h", bytes(time_zone_min))[0])
 
 
-# スケジュールデータを文字列に変換
 def sch2str(sch):
+  """
+  スケジュールデータを文字列に変換
+
+  Args:
+    sch: RPZ-PowerMGRの4バイトのスケジュールデータのリスト. ファームウェア仕様書参照. 
+  
+  Returns:
+    str: 文字列に直したスケジュール
+  """
   s = ''
   if (sch[0] & 0x40) == 0:
     s += 'ON  '
@@ -616,8 +682,16 @@ def sch2str(sch):
   return s
 
 
-# スケジュールデータ4バイトをcsvフォーマットの文字列に変換
 def sch2csv(sch):
+  """
+  スケジュールデータをcsvフォーマットの文字列に変換
+
+  Args:
+    sch: RPZ-PowerMGRの4バイトのスケジュールデータのリスト. ファームウェア仕様書参照. 
+  
+  Returns:
+    str: csvフォーマットの文字列に直したスケジュール
+  """
   s = ''
   if (sch[0] & 0x40) == 0:
     s += 'ON, '
@@ -651,9 +725,17 @@ def sch2csv(sch):
   return s
 
 
-# csvファイルの1行をスケジュールデータ4バイトに変換
-#   失敗した場合は空のリストを返す
 def csv2sch(csv_str):
+  """
+  csvファイルの1行をスケジュールデータ4バイトに変換
+
+  Args:
+    csv_str: csvフォーマットの文字列
+    sch: RPZ-PowerMGRの4バイトのスケジュールデータのリスト. ファームウェア仕様書参照. 
+  
+  Returns:
+    list: RPZ-PowerMGRの4バイトのスケジュールデータのリスト. 失敗したら空のリストを返す. 
+  """
   global fw_ver
   data = re.split(r'\s*,\s*', csv_str)
 
@@ -718,9 +800,17 @@ def csv2sch(csv_str):
   return sch
 
 
-# Yes/No選択メッセージを表示
-#   YesでTrue, NoでFalseを返す
 def ask(message, default=False):
+  """
+  メッセージを表示し, ユーザーにYes/Noを選択してもらう
+
+  Args:
+    message: 表示するメッセージ
+    default: デフォルトの選択. TrueだとYes, FalseだとNoがデフォルトになる. 
+  
+  Returns:
+    bool: Yes選択でTrue, No選択でFalse
+  """
   if (default):
     add_str = ' [Y/n]: '
   else:
@@ -736,8 +826,11 @@ def ask(message, default=False):
       return default
 
 
-# ブートローダーから起動
 def boot_loader():
+  """
+  RPZ-PowerMGRのコントローラーをブートローダーから起動する. 
+  DSW1-1, 3, 4をONにしておく必要がある. 
+  """
   GPIO.output(gpio_boot, 1)
   time.sleep(0.01)
   GPIO.output(gpio_rst, 0)
