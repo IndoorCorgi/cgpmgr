@@ -5,10 +5,11 @@ GitHub: https://github.com/IndoorCorgi/cgpmgr
 Version Dev
 
 必要環境:
-1) I2Cインターフェース
+1) Raspberry Pi OS, Python3
+2) I2Cインターフェース
   Raspberry PiでI2Cを有効にして下さい
   https://www.indoorcorgielec.com/resources/raspberry-pi/raspberry-pi-i2c/
-2) 電源管理 拡張基板 RPZ-PowerMGR
+3) 電源管理 拡張基板 RPZ-PowerMGR
   製品ページ https://www.indoorcorgielec.com/products/rpz-powermgr/
 
 Usage:
