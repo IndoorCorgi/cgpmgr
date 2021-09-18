@@ -96,7 +96,10 @@ known_hash = [
 ]
 
 
-def main():
+def cli():
+  """
+  コマンドラインツールを実行
+  """
   global i2c
   global i2c_adr
   global fw_ver
@@ -840,7 +843,3 @@ def boot_loader():
   time.sleep(0.01)
   GPIO.output(gpio_boot, 0)
   time.sleep(0.01)
-
-
-if __name__ == '__main__':
-  main()
