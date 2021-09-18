@@ -11,5 +11,5 @@ setup(
     packages=['cgpmgr'],
     install_requires=['docopt', 'RPi.GPIO'],
     entry_points={'console_scripts': ['cgpmgr=cgpmgr.cli:main',]},
-    python_requires=">=3.6",
+    python_requires='>=3.6',
 )
