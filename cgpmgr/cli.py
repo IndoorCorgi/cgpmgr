@@ -138,7 +138,8 @@ def cli():
       if fw_ver[0] <= compatible_fw[fw_ver[1]]:
         r = True
     if not r:
-      print('RPZ-PowerMGRに新しいファームウェアを確認しました. 最新版の pmgr.py をダウンロードしてください. ')
+      print('RPZ-PowerMGRに新しいファームウェアを確認しました. 以下のコマンドで最新版のcgpmgrをインストールしてください. ')
+      print('sudo python3 -m pip install -U cgpmgr')
       return
 
   #----------------------------
