@@ -13,7 +13,7 @@ Version Dev
   製品ページ https://www.indoorcorgielec.com/products/rpz-powermgr/
 
 Usage:
-  cgpmgr cf [-a] [-u <sec>] [-d <sec>] [-r <num>] [-c <num>] [-z <num>]
+  cgpmgr cf [-a] [-u <sec>] [-d <sec>] [-r <num>] [-c <num>] [-z <num>] [-A <num>] [-w <num>]
   cgpmgr sc [-a] [-o] [-D <date>] <time> (on | off)
   cgpmgr sc [-a] -l <min> (on | off)
   cgpmgr sc [-a] -R <num>
@@ -34,6 +34,8 @@ Options:
   -r <num>   シャットダウン要求信号に使うGPIO番号を 16, 17, 26, 27から指定, 0 で無効
   -c <num>   シャットダウン完了信号に使うGPIO番号を 16, 17, 26, 27から指定, 0 で無効
   -z <num>   タイムゾーンの世界標準時からの差分を分で指定. 日本(+9時間)の場合は540.
+  -A <num>   RTC未設定時オートラン. 1で有効. 0で無効. 
+  -w <num>   USB Type-AモバイルバッテリーWake up. 1で有効. 0で無効. 
 
   sc         電源ON/OFFスケジュールに関するサブコマンド. 
              オプションを何も指定しないと現在登録済みのスケジュールを表示する. 
@@ -188,6 +190,24 @@ def cli():
         return
       i2c_write(0x1A, list(struct.pack("h", int(args['-z']))))
 
+    if args['-A'] != None:
+      if not ((1 == fw_ver[1] and 4 <= fw_ver[0]) or (2 == fw_ver[1] and 1 <= fw_ver[0])):
+        print('-A は現在のファームウェアで利用できません. Webサイトの説明に沿って最新のファームウェアへアップデートして下さい. ')
+        return
+      if not check_digit('-A', args['-A'], 0, 1):
+        return
+      i2c_write(0x1C, [int(args['-A'])])
+      print('RTC未設定時オートランを' + ('無効にしました.' if 0 == int(args['-A']) else '有効にしました. '))
+
+    if args['-w'] != None:
+      if not ((1 == fw_ver[1] and 4 <= fw_ver[0]) or (2 == fw_ver[1] and 1 <= fw_ver[0])):
+        print('-w は現在のファームウェアで利用できません. Webサイトの説明に沿って最新のファームウェアへアップデートして下さい. ')
+        return
+      if not check_digit('-w', args['-w'], 0, 1):
+        return
+      i2c_write(0x1D, [int(args['-w'])])
+      print('USB Type-AモバイルバッテリーWake upを' + ('無効にしました.' if 0 == int(args['-w']) else '有効にしました. '))
+
     # コンフィグ読み出し
     rpi_startup_timer = i2c_read(0x16, 1)[0]
     rpi_sd_timer = i2c_read(0x17, 1)[0]
@@ -201,6 +221,13 @@ def cli():
     print('  シャットダウン要求信号: ' + ('無効' if sig_sd_request == 0 else 'GPIO{}'.format(sig2gpio[sig_sd_request])))
     print('  シャットダウン完了信号: ' + ('無効' if sig_sd_complete == 0 else 'GPIO{}'.format(sig2gpio[sig_sd_complete])))
     print('  タイムゾーン設定: ' + ('{}'.format(struct.unpack("h", bytes(time_zone_min))[0])))
+
+    # ファームウェアVersion1.4 / 2.1以降で追加されたオプション
+    if (1 == fw_ver[1] and 4 <= fw_ver[0]) or (2 == fw_ver[1] and 1 <= fw_ver[0]):
+      auto_run = i2c_read(0x1C, 1)[0]
+      usba_wake_up = i2c_read(0x1D, 1)[0]
+      print('  RTC未設定時オートラン: ' + ('無効' if auto_run == 0 else '有効'))
+      print('  USB Type-Aウェイクアップ: ' + ('無効' if usba_wake_up == 0 else '有効'))
 
   #----------------------------
   # スケジュールの追加, 削除, 表示
