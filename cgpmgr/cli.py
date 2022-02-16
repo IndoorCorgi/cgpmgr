@@ -79,7 +79,7 @@ import smbus
 import RPi.GPIO as GPIO
 
 i2c_adr = 0x20
-compatible_fw = {1: 3, 2: 0}
+compatible_fw = {1: 4, 2: 1}
 sig2gpio = [0, 16, 17, 26, 27]  # SIG番号とGPIO番号の対応
 dow2str = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']  # スケジュールデータは日曜が1, 土曜が7
 gpio_rst = 7
