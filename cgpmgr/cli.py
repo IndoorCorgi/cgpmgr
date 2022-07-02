@@ -34,7 +34,7 @@ Options:
   -r <num>   シャットダウン要求信号に使うGPIO番号を 16, 17, 26, 27から指定, 0 で無効
   -c <num>   シャットダウン完了信号に使うGPIO番号を 16, 17, 26, 27から指定, 0 で無効
   -z <num>   タイムゾーンの世界標準時からの差分を分で指定. 日本(+9時間)の場合は540.
-  -A <num>   RTC未設定時オートラン. 1で有効. 0で無効. 
+  -A <num>   電源自動リカバリー. 1で有効. 0で無効. 
   -w <num>   USB Type-AモバイルバッテリーWake up. 1で有効. 0で無効. 
 
   sc         電源ON/OFFスケジュールに関するサブコマンド. 
@@ -197,7 +197,7 @@ def cli():
       if not check_digit('-A', args['-A'], 0, 1):
         return
       i2c_write(0x1C, [int(args['-A'])])
-      print('RTC未設定時オートランを' + ('無効にしました.' if 0 == int(args['-A']) else '有効にしました. '))
+      print('電源自動リカバリーを' + ('無効にしました.' if 0 == int(args['-A']) else '有効にしました. '))
 
     if args['-w'] != None:
       if not ((1 == fw_ver[1] and 4 <= fw_ver[0]) or (2 == fw_ver[1] and 1 <= fw_ver[0])):
@@ -226,7 +226,7 @@ def cli():
     if (1 == fw_ver[1] and 4 <= fw_ver[0]) or (2 == fw_ver[1] and 1 <= fw_ver[0]):
       auto_run = i2c_read(0x1C, 1)[0]
       usba_wake_up = i2c_read(0x1D, 1)[0]
-      print('  RTC未設定時オートラン: ' + ('無効' if auto_run == 0 else '有効'))
+      print('  電源自動リカバリー: ' + ('無効' if auto_run == 0 else '有効'))
       print('  USB Type-Aウェイクアップ: ' + ('無効' if usba_wake_up == 0 else '有効'))
 
   #----------------------------
