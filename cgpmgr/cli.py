@@ -13,7 +13,7 @@ Version Dev
   製品ページ https://www.indoorcorgielec.com/products/rpz-powermgr/
 
 Usage:
-  cgpmgr cf [-a] [-u <sec>] [-d <sec>] [-r <num>] [-c <num>] [-z <num>] [-A <num>] [-w <num>]
+  cgpmgr cf [-a] [-u <sec>] [-d <sec>] [-r <num>] [-c <num>] [-z <num>] [-p <num>] [-w <num>]
   cgpmgr sc [-a] [-o] [-D <date>] <time> (on | off)
   cgpmgr sc [-a] -l <min> (on | off)
   cgpmgr sc [-a] -R <num>
@@ -34,7 +34,7 @@ Options:
   -r <num>   シャットダウン要求信号に使うGPIO番号を 16, 17, 26, 27から指定, 0 で無効
   -c <num>   シャットダウン完了信号に使うGPIO番号を 16, 17, 26, 27から指定, 0 で無効
   -z <num>   タイムゾーンの世界標準時からの差分を分で指定. 日本(+9時間)の場合は540.
-  -A <num>   電源自動リカバリー. 1で有効. 0で無効. 
+  -p <num>   電源自動リカバリー. 1で有効. 0で無効. 
   -w <num>   USB Type-AモバイルバッテリーWake up. 1で有効. 0で無効. 
 
   sc         電源ON/OFFスケジュールに関するサブコマンド. 
@@ -190,14 +190,14 @@ def cli():
         return
       i2c_write(0x1A, list(struct.pack("h", int(args['-z']))))
 
-    if args['-A'] != None:
+    if args['-p'] != None:
       if not ((1 == fw_ver[1] and 4 <= fw_ver[0]) or (2 == fw_ver[1] and 1 <= fw_ver[0])):
-        print('-A は現在のファームウェアで利用できません. Webサイトの説明に沿って最新のファームウェアへアップデートして下さい. ')
+        print('-p は現在のファームウェアで利用できません. Webサイトの説明に沿って最新のファームウェアへアップデートして下さい. ')
         return
-      if not check_digit('-A', args['-A'], 0, 1):
+      if not check_digit('-p', args['-p'], 0, 1):
         return
-      i2c_write(0x1C, [int(args['-A'])])
-      print('電源自動リカバリーを' + ('無効にしました.' if 0 == int(args['-A']) else '有効にしました. '))
+      i2c_write(0x1C, [int(args['-p'])])
+      print('電源自動リカバリーを' + ('無効にしました.' if 0 == int(args['-p']) else '有効にしました. '))
 
     if args['-w'] != None:
       if not ((1 == fw_ver[1] and 4 <= fw_ver[0]) or (2 == fw_ver[1] and 1 <= fw_ver[0])):
