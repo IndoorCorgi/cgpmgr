@@ -76,7 +76,7 @@ import re
 import struct
 import subprocess
 import hashlib
-import smbus
+import smbus2
 import RPi.GPIO as GPIO
 
 i2c_adr = 0x20
@@ -116,7 +116,7 @@ def cli():
   args = docopt(__doc__)
 
   try:
-    i2c = smbus.SMBus(1)
+    i2c = smbus2.SMBus(1)
   except FileNotFoundError:
     print('I2Cバスが開けませんでした. I2Cが有効になっているか確認して下さい. ')
     return
