@@ -9,7 +9,7 @@ setup(
     url='https://github.com/IndoorCorgi/cgpmgr',
     license='Apache License 2.0',
     packages=['cgpmgr'],
-    install_requires=['docopt', 'RPi.GPIO'],
+    install_requires=['docopt'],
     entry_points={'console_scripts': ['cgpmgr=cgpmgr:cli',]},
     python_requires='>=3.6',
 )
