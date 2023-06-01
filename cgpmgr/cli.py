@@ -1,13 +1,13 @@
 """
-Raspberry Pi電源管理 拡張基板 RPZ-PowerMGR用コントロールツール
+Raspberry Pi/Jetson Nano電源管理 拡張基板 RPZ-PowerMGR用コントロールツール
 Indoor Corgi, https://www.indoorcorgielec.com
 GitHub: https://github.com/IndoorCorgi/cgpmgr
 Version 1.2
 
 必要環境:
-1) Raspberry Pi OS, Python3
+1) Raspberry Pi OS / Jetson Linux, Python3
 2) I2Cインターフェース
-  Raspberry PiでI2Cを有効にして下さい
+  Raspberry PiでI2Cを有効にする方法
   https://www.indoorcorgielec.com/resources/raspberry-pi/raspberry-pi-i2c/
 3) 電源管理 拡張基板 RPZ-PowerMGR
   製品ページ https://www.indoorcorgielec.com/products/rpz-powermgr/
@@ -53,9 +53,9 @@ Options:
   -i         スケジュールをcsvファイルから読み出して追加する. 
              省略すると登録済みスケジュールをcsvファイルに保存する.
 
-  me         Raspberry Piの消費電流測定, 結果ログを行うサブコマンド. 
+  me         Raspberry Pi/Jetson Nanoの消費電流測定, 結果ログを行うサブコマンド. 
              オプションを指定しないと直近の電流測定値を表示. 
-  -L         記録されているRaspberry Piの消費電流値を読み出す. 
+  -L         記録されている消費電流値を読み出す. 
              電源ONから1秒ごとに最大1時間まで記録可能.  
   -s         消費電流の記録をリセットして再スタート. 1秒ごと最大1時間まで記録可能.
 
@@ -444,11 +444,11 @@ def cli():
 
     elif args['-s']:
       i2c_write(0x24, [0xFF, 0xFF])
-      print('Raspberry Pi電流値のログをリセットしました. 現在から毎秒, 最大1時間まで記録します. ')
+      print('電流値のログをリセットしました. 現在から毎秒, 最大1時間まで記録します. ')
 
     else:
       curr = i2c_read(0x20, 2)
-      print('Raspberry Pi電流値 {}[mA]'.format((curr[1] << 8) + curr[0]))
+      print('電流値 {}[mA]'.format((curr[1] << 8) + curr[0]))
 
   #----------------------------
   # ファームウェア書き換え
