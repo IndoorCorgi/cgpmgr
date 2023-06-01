@@ -42,10 +42,9 @@ Options:
   -o         指定すると, 登録するスケジュールがOneTime(1回のみ)になる. 
              省略するとRepeat(繰り返し). 
   -D <date>  登録するスケジュールの月/日を指定. *か**で全てに一致. 
-             日はSun, Mon, Tue, Wed, Thu, Fri, Satで曜日も指定可能. 
-             日は必ず指定する. 省略すると*/*. 例)5/10, , 9/Sun, */15. 
+             日はSun, Mon, Tue, Wed, Thu, Fri, Satで曜日も指定可能. 例)5/10, , 9/Sun, */15. 
   <time>     登録するスケジュールの時:分を指定. *か**で全てに一致. 
-             時を*にしたら月日も必ず*になる(-D 指定不可). 分は*指定不可. 例)21:30, *:45
+             分は*指定不可. 例)21:30, *:45
   on         電源をONするスケジュールを登録する. 
   off        電源をOFFするスケジュールを登録する. 
   -l <min>   現在からmin分後にスケジュールを登録. 秒は切り上げになる. 1-999の範囲で指定. 
@@ -159,7 +158,8 @@ def cli():
       if not check_digit('-d', args['-d'], 0, 250):
         return
       i2c_write(0x17, [int(args['-d'])])
-      print('シャットダウンタイマーを' + ('無効にしました.' if 0 == int(args['-d']) else '{}秒に設定しました. '.format(args['-d'])))
+      print('シャットダウンタイマーを' +
+            ('無効にしました.' if 0 == int(args['-d']) else '{}秒に設定しました. '.format(args['-d'])))
 
     r = i2c_read(0x18, 1)[0]
     c = i2c_read(0x19, 1)[0]
@@ -181,11 +181,13 @@ def cli():
       if args['-c'] != None:
         i2c_write(0x19, [0])  # 番号が重なる可能性があるので一度無効化
       i2c_write(0x18, [r])
-      print('シャットダウン要求信号を' + ('無効にしました.' if 0 == int(args['-r']) else 'GPIO{} に設定しました. '.format(args['-r'])))
+      print('シャットダウン要求信号を' +
+            ('無効にしました.' if 0 == int(args['-r']) else 'GPIO{} に設定しました. '.format(args['-r'])))
 
     if args['-c'] != None:
       i2c_write(0x19, [c])
-      print('シャットダウン完了信号を' + ('無効にしました.' if 0 == int(args['-c']) else 'GPIO{} に設定しました. '.format(args['-c'])))
+      print('シャットダウン完了信号を' +
+            ('無効にしました.' if 0 == int(args['-c']) else 'GPIO{} に設定しました. '.format(args['-c'])))
 
     if args['-z'] != None:
       if not check_digit('-z', args['-z'], -720, 840):
@@ -220,8 +222,10 @@ def cli():
     print('  ファームウェアバージョン: {}.{}'.format(fw_ver[1], fw_ver[0]))
     print('  スタートアップタイマー: {}秒'.format(rpi_startup_timer))
     print('  シャットダウンタイマー: ' + ('無効' if rpi_sd_timer == 0 else '{}秒'.format(rpi_sd_timer)))
-    print('  シャットダウン要求信号: ' + ('無効' if sig_sd_request == 0 else 'GPIO{}'.format(sig2gpio[sig_sd_request])))
-    print('  シャットダウン完了信号: ' + ('無効' if sig_sd_complete == 0 else 'GPIO{}'.format(sig2gpio[sig_sd_complete])))
+    print('  シャットダウン要求信号: ' +
+          ('無効' if sig_sd_request == 0 else 'GPIO{}'.format(sig2gpio[sig_sd_request])))
+    print('  シャットダウン完了信号: ' +
+          ('無効' if sig_sd_complete == 0 else 'GPIO{}'.format(sig2gpio[sig_sd_complete])))
     print('  タイムゾーン設定: ' + ('{}'.format(struct.unpack("h", bytes(time_zone_min))[0])))
 
     # ファームウェアVersion1.4 / 2.1以降で追加されたオプション
@@ -450,7 +454,10 @@ def cli():
   # ファームウェア書き換え
   if args['fw']:
     try:
-      res = subprocess.run(['stm32flash'], encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+      res = subprocess.run(['stm32flash'],
+                           encoding='utf-8',
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.STDOUT)
     except:
       print('stm32flashが見つかりませんでした. sudo apt install stm32flash コマンドでインストールして下さい. ')
       return
@@ -496,7 +503,8 @@ def cli():
       return
 
     boot_loader()
-    res = subprocess.run(['stm32flash', '/dev/i2c-1', '-a', '0x42', '-e 0', '-w', args['-f'], '-v', '-R'])
+    res = subprocess.run(
+        ['stm32flash', '/dev/i2c-1', '-a', '0x42', '-e 0', '-w', args['-f'], '-v', '-R'])
     if res.returncode != 0:
       print('ファームウェアの書き換え中にエラーが発生しました')
       GPIO.cleanup(gpio_rst)
@@ -605,7 +613,8 @@ def print_time_bcd(bcd):
   Args:
     bcd: BCDフォーマットの7バイトデータのリスト
   """
-  print('20{}{}/{}{}/{}{} '.format(bcd[6] >> 4, bcd[6] & 0xF, bcd[5] >> 4, bcd[5] & 0xF, bcd[4] >> 4, bcd[4] & 0xF),
+  print('20{}{}/{}{}/{}{} '.format(bcd[6] >> 4, bcd[6] & 0xF, bcd[5] >> 4, bcd[5] & 0xF,
+                                   bcd[4] >> 4, bcd[4] & 0xF),
         end='')
   if bcd[3] == 1:
     print('日 ', end='')
@@ -621,7 +630,8 @@ def print_time_bcd(bcd):
     print('金 ', end='')
   elif bcd[3] == 7:
     print('土 ', end='')
-  print('{}{}:{}{}:{}{}'.format(bcd[2] >> 4, bcd[2] & 0xF, bcd[1] >> 4, bcd[1] & 0xF, bcd[0] >> 4, bcd[0] & 0xF))
+  print('{}{}:{}{}:{}{}'.format(bcd[2] >> 4, bcd[2] & 0xF, bcd[1] >> 4, bcd[1] & 0xF, bcd[0] >> 4,
+                                bcd[0] & 0xF))
 
 
 def make_bcd(year, month, date, dow, hour, minute, second):
