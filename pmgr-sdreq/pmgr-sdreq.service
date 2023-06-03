@@ -1,0 +1,11 @@
+[Unit]
+Description=RPZ-PowerMGR shutdown request receiver
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/pmgr-sdreq --gpio 16
+ExecStop=/bin/systemctl kill pmgr-sdreq
+
+[Install]
+WantedBy=multi-user.target
