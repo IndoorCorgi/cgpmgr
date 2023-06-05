@@ -1,0 +1,29 @@
+/dts-v1/;
+/plugin/;
+/ {
+  overlay-name = "RPZ-PowerMGR";
+  jetson-header-name = "Jetson 40pin Header";
+  compatible = "nvidia,jetson-nano", "nvidia,jetson-nano-2gb";
+
+  fragment@0 {
+    target = <&hdr40_i2c1>;
+    __overlay__ {
+      rtc@68 {
+        compatible = "dallas,ds1307";
+        reg = <0x68>;
+      };
+    };
+  };
+
+  fragment@1 {
+    target-path = "/leds";
+    __overlay__ {
+      pmgr_sd_complete {
+        default-state = "off";
+        gpios = <&gpio 12 0>;  // PB.04, RPiGPIO26, Active high
+        linux,default-trigger = "none";
+      };
+    };
+  };
+};
+
