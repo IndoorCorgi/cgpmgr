@@ -47,7 +47,8 @@ Options:
              分は*指定不可. 例)21:30, *:45
   on         電源をONするスケジュールを登録する. 
   off        電源をOFFするスケジュールを登録する. 
-  -l <min>   現在からmin分後にスケジュールを登録. 秒は切り上げになる. 1-999の範囲で指定. 
+  -l <min>   現在からmin分後にスケジュールを登録. 秒は切り上げになる. 0-999の範囲で指定. 
+             0を指定すると1分単位で可能な限り早いスケジュールになる. 
              このオプションで登録するとOneTime(1回のみ)になる. 
   -R <num>   指定すると登録済みスケジュールから指定番号のものを削除. 255を指定すると全て削除. 
   -i         スケジュールをcsvファイルから読み出して追加する. 
@@ -305,10 +306,14 @@ def cli():
       sch[0] |= 0x80
 
     if args['-l'] != None:
-      if not check_digit('-l', args['-l'], 1, 999):
+      if not check_digit('-l', args['-l'], 0, 999):
         return
       dtrtc = read_rtc()
-      dt = dtrtc + datetime.timedelta(minutes=1 + int(args['-l']))
+      delay = int(args['-l'])
+      if delay == 0:
+        dt = dtrtc + datetime.timedelta(seconds=75)  # 通信, 計算マージン15秒 + 桁繰り上げ用60秒
+      else:
+        dt = dtrtc + datetime.timedelta(minutes=1 + delay)
       sch[0] |= dt.minute | 0x80
       sch[1] = dt.hour
       sch[2] = dt.day
