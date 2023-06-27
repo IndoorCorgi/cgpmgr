@@ -763,7 +763,7 @@ def sch2csv(sch):
     if (sch[2] & 0x40) == 0:
       s += '{:02}, '.format(sch[2])
     else:
-      s += '{}, '.format((dow2str[sch[2] & 0x7 - 1]))
+      s += '{}, '.format(dow2str[(sch[2] & 0x7) - 1])
   else:
     s += '*, '
 
