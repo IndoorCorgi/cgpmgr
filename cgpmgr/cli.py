@@ -48,7 +48,7 @@ Options:
   on         電源をONするスケジュールを登録する. 
   off        電源をOFFするスケジュールを登録する. 
   -l <min>   現在からmin分後にスケジュールを登録. 秒は切り上げになる. 0-999の範囲で指定. 
-             0を指定すると1分単位で可能な限り早いスケジュールになる. 
+             0を指定すると可能な限り早いスケジュールになる. 
              このオプションで登録するとOneTime(1回のみ)になる. 
   -R <num>   指定すると登録済みスケジュールから指定番号のものを削除. 255を指定すると全て削除. 
   -i         スケジュールをcsvファイルから読み出して追加する. 
@@ -81,7 +81,7 @@ import smbus2
 import RPi.GPIO as GPIO
 
 i2c_adr = 0x20
-compatible_fw = {1: 5, 2: 2}
+compatible_fw = {1: 6, 2: 3}
 sig2gpio = [0, 16, 17, 26, 27]  # SIG番号とGPIO番号の対応
 dow2str = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']  # スケジュールデータは日曜が1, 土曜が7
 gpio_rst = 7
@@ -96,9 +96,11 @@ known_hash = [
     'a37fe6f36a4e99bab07e3106cb99306d13f88d4c72c68b309a4fd9eb8e4c44e8',  # Ver1.3
     '36313403baab9d50183f17d0f9cea991455baf7b1b0478e1ef8773cee0ea91cc',  # Ver1.4
     'c3f465e5c8e2e004b23d85a6f5846931e106fd8a06715d48e54750c875cfe882',  # Ver1.5
+    '6aff47c6ceb831cf48662a71dcc0090b437a6129aa8b29d5bcebb5e0cd46e98b',  # Ver1.6
     '0bdb41e819fcd8380a9bf1f551a6a7692bd22bcdb3734580413e4401fa613490',  # Ver2.0
     'f5aa9ab42affd8004238bf1f747d93095b5138602473660eb7965a24d03b167b',  # Ver2.1
     'a49c1fa3c1f540fcbb77d69be4d599791d3a5a88508e7519aaab2c5426f0fb0c',  # Ver2.2
+    'c39cc7100644abafd3f69bc0b61304093b4a535097fd637282837ed8fe007821',  # Ver2.3
 ]
 
 
@@ -308,6 +310,14 @@ def cli():
     if args['-l'] != None:
       if not check_digit('-l', args['-l'], 0, 999):
         return
+
+      # -l 0 offかつファームウェアが対応している場合, すぐにシャットダウンリクエスト
+      if 0 == int(args['-l']):
+        if (fw_ver[1] == 1 and fw_ver[0] >= 6) or (fw_ver[1] == 2 and fw_ver[0] >= 3):
+          print('シャットダウン要求を開始します')
+          i2c_write(0x40, [0xFF])
+          return
+
       dtrtc = read_rtc()
       delay = int(args['-l'])
       if delay == 0:
