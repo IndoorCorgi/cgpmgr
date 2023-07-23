@@ -2,7 +2,7 @@
 Raspberry Pi/Jetson Nano電源管理 拡張基板 RPZ-PowerMGR用コントロールツール
 Indoor Corgi, https://www.indoorcorgielec.com
 GitHub: https://github.com/IndoorCorgi/cgpmgr
-Version 1.6
+Version 1.7
 
 必要環境:
 1) Raspberry Pi OS / Jetson Linux, Python3
@@ -81,7 +81,7 @@ import smbus2
 import RPi.GPIO as GPIO
 
 i2c_adr = 0x20
-compatible_fw = {1: 6, 2: 3}
+compatible_fw = {1: 7, 2: 4}
 sig2gpio = [0, 16, 17, 26, 27]  # SIG番号とGPIO番号の対応
 dow2str = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']  # スケジュールデータは日曜が1, 土曜が7
 gpio_rst = 7
@@ -97,10 +97,12 @@ known_hash = [
     '36313403baab9d50183f17d0f9cea991455baf7b1b0478e1ef8773cee0ea91cc',  # Ver1.4
     'c3f465e5c8e2e004b23d85a6f5846931e106fd8a06715d48e54750c875cfe882',  # Ver1.5
     '6aff47c6ceb831cf48662a71dcc0090b437a6129aa8b29d5bcebb5e0cd46e98b',  # Ver1.6
+    '14fcce2876dc004f5598d50d36eef4898e048197566a5de319ede510019df031',  # Ver1.7
     '0bdb41e819fcd8380a9bf1f551a6a7692bd22bcdb3734580413e4401fa613490',  # Ver2.0
     'f5aa9ab42affd8004238bf1f747d93095b5138602473660eb7965a24d03b167b',  # Ver2.1
     'a49c1fa3c1f540fcbb77d69be4d599791d3a5a88508e7519aaab2c5426f0fb0c',  # Ver2.2
     'c39cc7100644abafd3f69bc0b61304093b4a535097fd637282837ed8fe007821',  # Ver2.3
+    '39498cf80856838cf9676c0e40316d1e7ae283d03179d1d538d1cca992a0e9cc',  # Ver2.4
 ]
 
 

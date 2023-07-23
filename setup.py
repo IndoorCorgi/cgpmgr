@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='cgpmgr',
-    version='1.6',
+    version='1.7',
     description='Controller tool of Raspberry Pi power management board "RPZ-PowerMGR".',
     author='Indoor Corgi',
     author_email='indoorcorgi@gmail.com',
