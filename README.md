@@ -39,6 +39,12 @@ Raspberry PiやJetson Nanoは便利なシングルボードコンピュータで
 
 以下のコマンドでコントロールツールをインストール/アップグレードできます。取り付けやOSのセットアップ手順は[製品ページ](https://www.indoorcorgielec.com/products/rpz-powermgr/)を参照してください. 
 
+### Raspberry Pi OS
+
+`sudo python3 -m pip install -U cgpmgr --break-system-packages`
+
+### Jetson Nano
+
 `sudo python3 -m pip install -U cgpmgr`
 
 ## 使い方
