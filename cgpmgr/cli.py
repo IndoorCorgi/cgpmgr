@@ -504,22 +504,12 @@ def cli():
                          encoding='utf-8',
                          stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
-    if re.search(r'Fail', res.stdout):
-      print('ファームウェアの書き換え中にエラーが発生しました')
-      GPIO.cleanup(gpio_rst)
-      GPIO.cleanup(gpio_boot)
-      return
 
     boot_loader()
     res = subprocess.run(['stm32flash', '/dev/i2c-1', '-a', '0x42', '-k'],
                          encoding='utf-8',
                          stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
-    if re.search(r'Fail', res.stdout):
-      print('ファームウェアの書き換え中にエラーが発生しました')
-      GPIO.cleanup(gpio_rst)
-      GPIO.cleanup(gpio_boot)
-      return
 
     boot_loader()
     res = subprocess.run(
