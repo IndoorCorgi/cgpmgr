@@ -43,6 +43,10 @@ Raspberry PiやJetson Nanoは便利なシングルボードコンピュータで
 
 `sudo python3 -m pip install -U cgpmgr --break-system-packages`
 
+上記でエラーとなる場合は以下をお試しください. 
+
+`sudo python3 -m pip install -U cgpmgr`
+
 ### Jetson Nano
 
 `sudo python3 -m pip install -U cgpmgr`
