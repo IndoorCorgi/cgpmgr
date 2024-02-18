@@ -78,7 +78,6 @@ import struct
 import subprocess
 import hashlib
 import smbus2
-import RPi.GPIO as GPIO
 
 i2c_adr = 0x20
 compatible_fw = {1: 7, 2: 4}
@@ -492,14 +491,12 @@ def cli():
       return
 
     print('RPZ-PowerMGRのスイッチDSW1-1, 3, 4がONになっていることを確認してください. ')
+    print('SPIが有効な場合は無効化してください. ')
     if not ask('ファームウェア書き換えを開始してよろしいですか？'):
       return
 
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(gpio_rst, GPIO.OUT)
-    GPIO.setup(gpio_boot, GPIO.OUT)
-
     boot_loader()
+    # return
     res = subprocess.run(['stm32flash', '/dev/i2c-1', '-a', '0x42', '-j'],
                          encoding='utf-8',
                          stdout=subprocess.PIPE,
@@ -516,12 +513,8 @@ def cli():
         ['stm32flash', '/dev/i2c-1', '-a', '0x42', '-e 0', '-w', args['-f'], '-v', '-R'])
     if res.returncode != 0:
       print('ファームウェアの書き換え中にエラーが発生しました')
-      GPIO.cleanup(gpio_rst)
-      GPIO.cleanup(gpio_boot)
       return
 
-    GPIO.cleanup(gpio_rst)
-    GPIO.cleanup(gpio_boot)
     print('ファームウェアの書き換えが完了しました. ')
 
 
@@ -884,11 +877,32 @@ def boot_loader():
   RPZ-PowerMGRのコントローラーをブートローダーから起動する. 
   DSW1-1, 3, 4をONにしておく必要がある. 
   """
-  GPIO.output(gpio_boot, 1)
-  time.sleep(0.01)
-  GPIO.output(gpio_rst, 0)
-  time.sleep(0.01)
-  GPIO.output(gpio_rst, 1)
-  time.sleep(0.01)
-  GPIO.output(gpio_boot, 0)
-  time.sleep(0.01)
+  try:
+    from gpiozero import DigitalOutputDevice
+    boot = DigitalOutputDevice(gpio_boot)
+    time.sleep(0.01)
+    boot.value = 1
+    time.sleep(0.01)
+    rst = DigitalOutputDevice(gpio_rst)
+    time.sleep(0.01)
+    rst.value = 1
+    time.sleep(0.01)
+    boot.value = 0
+    rst.close()
+    boot.close()
+  except ImportError:
+    # gpiozeroが使用できない環境ではRPi.GPIOを使用
+    import RPi.GPIO as GPIO
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(gpio_rst, GPIO.OUT)
+    GPIO.setup(gpio_boot, GPIO.OUT)
+    GPIO.output(gpio_boot, 1)
+    time.sleep(0.01)
+    GPIO.output(gpio_rst, 0)
+    time.sleep(0.01)
+    GPIO.output(gpio_rst, 1)
+    time.sleep(0.01)
+    GPIO.output(gpio_boot, 0)
+    time.sleep(0.01)
+    GPIO.cleanup(gpio_rst)
+    GPIO.cleanup(gpio_boot)
