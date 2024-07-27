@@ -67,8 +67,8 @@ def main():
       source_url = 'https://developer.nvidia.com/downloads/remack-sdksjetpack-463r32releasev73sourcest210publicsourcestbz2'
       install_version = '4.9.299-tegra-extrtc'
     else:
-      # JetPack4.6.4 / Jetson Linux R32.7.4: 4.9.337
-      source_url = 'https://developer.nvidia.com/downloads/embedded/l4t/r32_release_v7.4/sources/t210/public_sources.tbz2'
+      # JetPack4.6.5 / Jetson Linux R32.7.5: 4.9.337
+      source_url = 'https://developer.nvidia.com/downloads/embedded/l4t/r32_release_v7.5/sources/t210/public_sources.tbz2'
       install_version = '4.9.337-tegra-extrtc'
 
       if current_ver_major == 4 and current_ver_patch == 9 and current_ver_sub >= 337:
@@ -78,11 +78,6 @@ def main():
                    'セットアップを中止し, JetPack4.6をインストールし直すことを推奨します. '
                    '続行しますか？'):
           return
-
-      # 異なるバージョンで続行する場合
-      # JetPack4.6.4 / Jetson Linux R32.7.4: 4.9.337
-      source_url = 'https://developer.nvidia.com/downloads/embedded/l4t/r32_release_v7.4/sources/t210/public_sources.tbz2'
-      install_version = '4.9.337-tegra-extrtc'
 
     if ask(message='\nステップ1) カーネルのインストール を実行しますか？\n'
            'この処理には1時間程度を要します. ', default=True):
