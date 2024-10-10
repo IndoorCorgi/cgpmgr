@@ -13,7 +13,7 @@ Version 1.11
   製品ページ https://www.indoorcorgielec.com/products/rpz-powermgr/
 
 Usage:
-  cgpmgr cf [-a] [-u <sec>] [-d <sec>] [-r <num>] [-c <num>] [-z <num>] [-p <num>] [-w <num>]
+  cgpmgr cf [-a] [-u <sec>] [-d <sec>] [-r <num>] [-c <num>] [-z <num>] [-p <num>] [-w <num>] [-b <num>]
   cgpmgr sc [-a] [-o] [-D <date>] <time> (on | off)
   cgpmgr sc [-a] -l <min> (on | off)
   cgpmgr sc [-a] -R <num>
@@ -36,6 +36,7 @@ Options:
   -z <num>   タイムゾーンの世界標準時からの差分を分で指定. 日本(+9時間)の場合は540.
   -p <num>   電源自動リカバリー. 1で有効. 0で無効. 
   -w <num>   USB Type-AモバイルバッテリーWake up. 1で有効. 0で無効. 
+  -b <num>   再起動時の処理. 0でRaspberry Pi用の処理. 1-255で指定秒数待機して確認. Jetson Nanoでは5を推奨. 
 
   sc         電源ON/OFFスケジュールに関するサブコマンド. 
              オプションを何も指定しないと現在登録済みのスケジュールを表示する. 
@@ -80,7 +81,7 @@ import hashlib
 import smbus2
 
 i2c_adr = 0x20
-compatible_fw = {1: 9, 2: 6}
+compatible_fw = {1: 10, 2: 7}
 sig2gpio = [0, 16, 17, 26, 27]  # SIG番号とGPIO番号の対応
 dow2str = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']  # スケジュールデータは日曜が1, 土曜が7
 gpio_rst = 7
@@ -99,6 +100,7 @@ known_hash = [
     '14fcce2876dc004f5598d50d36eef4898e048197566a5de319ede510019df031',  # Ver1.7
     'eb4e7bf2b2aa4a7d70fc2208e6f44122859f1efba5ea44846ee0b4db82e40bb4',  # Ver1.8
     '5382b9347f357af3429d8c204065e62d524f6957e8249040bba6e0effd6967d5',  # Ver1.9
+    '44a14a0cb0e682ee69def44753381013164e21b10c64faa6228fe526f4d1f9c7',  # Ver1.10
     '0bdb41e819fcd8380a9bf1f551a6a7692bd22bcdb3734580413e4401fa613490',  # Ver2.0
     'f5aa9ab42affd8004238bf1f747d93095b5138602473660eb7965a24d03b167b',  # Ver2.1
     'a49c1fa3c1f540fcbb77d69be4d599791d3a5a88508e7519aaab2c5426f0fb0c',  # Ver2.2
@@ -106,6 +108,7 @@ known_hash = [
     '39498cf80856838cf9676c0e40316d1e7ae283d03179d1d538d1cca992a0e9cc',  # Ver2.4
     'ae89f56fd2886076d41d583fe2f4e82520f9d1c2dbf7e020c787b04f5e3e46c1',  # Ver2.5
     '17cf25d7e5115643498e41cb5b66a494e204f95887fb0836b3adb6a6f5fd7cef',  # Ver2.6
+    'a351b9554a3999f13020e7a063cd61445d7368f8a5d031bfa2f6ceef2d3ef528',  # Ver2.7
 ]
 
 
@@ -224,6 +227,16 @@ def cli():
       i2c_write(0x1D, [int(args['-w'])])
       print('USB Type-AモバイルバッテリーWake upを' + ('無効にしました.' if 0 == int(args['-w']) else '有効にしました. '))
 
+    if args['-b'] != None:
+      if not ((1 == fw_ver[1] and 10 <= fw_ver[0]) or (2 == fw_ver[1] and 7 <= fw_ver[0])):
+        print('-b は現在のファームウェアで利用できません. Webサイトの説明に沿って最新のファームウェアへアップデートして下さい. ')
+        return
+      if not check_digit('-b', args['-b'], 0, 255):
+        return
+      i2c_write(0x1E, [int(args['-b'])])
+      print('再起動処理を' + ('Raspberry Piに設定しました.' if 0 ==
+                        int(args['-b']) else '{}秒待機して確認に設定しました.'.format(int(args['-b']))))
+
     # コンフィグ読み出し
     rpi_startup_timer = i2c_read(0x16, 1)[0]
     rpi_sd_timer = i2c_read(0x17, 1)[0]
@@ -246,6 +259,12 @@ def cli():
       usba_wake_up = i2c_read(0x1D, 1)[0]
       print('  電源自動リカバリー: ' + ('無効' if auto_run == 0 else '有効'))
       print('  USB Type-Aウェイクアップ: ' + ('無効' if usba_wake_up == 0 else '有効'))
+
+    # ファームウェアVersion1.10 / 2.7以降で追加されたオプション
+    if (1 == fw_ver[1] and 10 <= fw_ver[0]) or (2 == fw_ver[1] and 7 <= fw_ver[0]):
+      reboot_sequence = i2c_read(0x1E, 1)[0]
+      print('  再起動処理: ' +
+            ('Raspberry Pi' if reboot_sequence == 0 else '{}秒待機して確認'.format(reboot_sequence)))
 
   #----------------------------
   # スケジュールの追加, 削除, 表示
