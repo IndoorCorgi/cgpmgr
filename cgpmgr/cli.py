@@ -120,7 +120,9 @@ def cli():
   try:
     from docopt import docopt
   except ImportError:
-    print('docoptのインポートに失敗しました. sudo python3 -m pip install docopt コマンドでインストールして下さい. ')
+    print(
+        'docoptのインポートに失敗しました. sudo python3 -m pip install docopt --break-system-packages コマンドでインストールして下さい. '
+    )
     return
 
   args = docopt(__doc__)
@@ -152,7 +154,7 @@ def cli():
         r = True
     if not r:
       print('RPZ-PowerMGRに新しいファームウェアを確認しました. 以下のコマンドで最新版のcgpmgrをインストールしてください. ')
-      print('sudo python3 -m pip install -U cgpmgr')
+      print('sudo python3 -m pip install -U cgpmgr --break-system-packages')
       return
 
   #----------------------------
